@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  flask:
+    image: gokula17/smartmediaserver 
+    networks:
+      - flask-mongo
+    ports:
+      - "5000:5000"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - C:/Users/rybac/Downloads/media:/media
+    depends_on:
+      - mongodatabase
+  
+  mongodatabase:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    networks:
+      - flask-mongo
+  
+networks:
+  flask-mongo:
