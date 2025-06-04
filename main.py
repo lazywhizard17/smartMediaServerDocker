@@ -8,7 +8,7 @@ import os, time
 app = Flask(__name__)
 
 currentFolderPath = "/media"
-portNumber = int(os.getenv("PORT_NUMBER", 16867))
+portNumber = int(os.getenv("portNumber", 16867))
 fullArray = []
 
 @app.route("/") 
