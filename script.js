@@ -1,4 +1,6 @@
 const body = document.querySelector('body')
+const folderDIV = document.getElementById('folder')
+const galleryDiv = document.getElementById('gallery')
 
 let currentFolder = ''
 let previousFolder = ''
@@ -14,7 +16,6 @@ const getCurrentFolder = function(){
         if(e.target.readyState === 4)
         {
             currentFolder = JSON.parse(e.target.response)
-            console.log(currentFolder)
             mainFunction()
         }
     })
@@ -27,7 +28,6 @@ const postCurrentFolder = function(){
     xhr.addEventListener('readystatechange', (e) => {
         if (e.target.readyState === 4){
             const response = JSON.parse(e.target.responseText);
-            console.log("Server responded:", response);
         }
     });
     xhr.open("POST", "/postcurrentfolder", true);
@@ -41,15 +41,17 @@ const mainFunction = function(){
     {
         // For previous folder icon
         goBackDiv = document.createElement('div')
+        goBackDiv.className = 'folder-item'
         goBackDiv.textContent = `📁Go Back to ${previousFolderArray[previousFolderArray.length-1]}`
         goBackDiv.addEventListener('click', ()=>{
-            body.innerHTML = ""
+            galleryDiv.innerHTML = ""
+            folderDIV.innerHTML = ""
             currentFolderPath = currentFolderPath.replace(`/${currentFolder}`,"")
             currentFolder = previousFolderArray[previousFolderArray.length - 1]
             previousFolderArray.pop()
             mainFunction()
         })
-        body.appendChild(goBackDiv)
+        folderDIV.appendChild(goBackDiv)
         
 
         // Actual contents of the clicked folder
@@ -57,35 +59,41 @@ const mainFunction = function(){
         request1.addEventListener('readystatechange', (e)=>{
             if(e.target.readyState === 4)
             {
-                const folderContentArray = JSON.parse(e.target.response)                
+                const folderContentArray = JSON.parse(e.target.response)
+                console.log(folderContentArray)                
                 for(let i = 0; i<folderContentArray.length; i++)
                 {
                     const item = folderContentArray[i]
                     if(item.type === "folder")
                     {
                         const folderDiv = document.createElement('div')
+                        folderDiv.className='folder-item'
                         folderDiv.textContent = `📁${item.name}`
                         folderDiv.addEventListener('click', ()=>{
-                            body.innerHTML = ""
+                            galleryDiv.innerHTML = ""
+                            folderDIV.innerHTML = ""
                             previousFolderArray.push(currentFolder)
                             currentFolder = item.name
                             currentFolderPath = currentFolderPath + `/${currentFolder}`
                             mainFunction()
                         })
-                        body.appendChild(folderDiv)
+                        folderDIV.appendChild(folderDiv)
                     }
                     else if(item.type === "video")
                     {
                         const videoTag = document.createElement('video')
                         videoTag.controls = true
                         videoTag.src = item.url
-                        body.appendChild(videoTag)
+                        galleryDiv.appendChild(videoTag)
                     }
                     else if(item.type === "image")
                     {
-                        const imageDiv = document.createElement('img')
-			            imageDiv.src = item.url
-                        body.appendChild(imageDiv)
+                        const imageTag = document.createElement('img')
+			            imageTag.src = item.url
+                        imageTag.addEventListener('click', ()=>{
+                            window.open(item.url)
+                        })
+                        galleryDiv.appendChild(imageTag)
                     }
                 }
             }
@@ -108,28 +116,33 @@ const mainFunction = function(){
                     if(item.type === "folder")
                     {
                         const folderDiv = document.createElement('div')
+                        folderDiv.className='folder-item'
                         folderDiv.textContent = `📁${item.name}`
                         folderDiv.addEventListener('click', ()=>{
-                            body.innerHTML = ''
+                            galleryDiv.innerHTML = ''
+                            folderDIV.innerHTML = ''
                             previousFolderArray.push('main')
                             currentFolder = item.name
                             currentFolderPath = `/media/${item.name}`
                             mainFunction()
                         })
-                        body.appendChild(folderDiv)
+                        folderDIV.appendChild(folderDiv)
                     }
                     else if (item.type === "video")
                     {
                         const videoTag = document.createElement('video')
                         videoTag.src = item.url
                         videoTag.controls = true
-                        body.appendChild(videoTag)
+                        galleryDiv.appendChild(videoTag)
                     }
                     else if (item.type === 'image')
                     {
                         const imageTag = document.createElement('img')
                         imageTag.src = item.url
-                        body.appendChild(imageTag)
+                        imageTag.addEventListener('click', ()=>{
+                            window.open(item.url)
+                        })
+                        galleryDiv.appendChild(imageTag)
                     }
                 }
             }
