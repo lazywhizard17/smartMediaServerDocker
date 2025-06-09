@@ -8,7 +8,7 @@ import os, time
 app = Flask(__name__)
 
 currentFolderPath = "/media"
-portNumber = int(os.getenv("portNumber", 16867))
+portNumber = int(os.getenv("portNumber", 5000))
 fullArray = []
 
 @app.route("/") 
@@ -40,7 +40,8 @@ def receive_folder():
 
 @app.route("/folder")
 def random_folder():
-    client = MongoClient('mongodb://mongodatabase:27017')
+    mongoURL = f"mongodb://mongodatabase:27017"
+    client = MongoClient(mongoURL)
     db = client['mediaserver']
     collection = db['url']
 
@@ -57,8 +58,7 @@ def random_folder():
             }
             folderContentArray.append(obj)
         elif os.path.isfile(itemPath):
-            _, ext = os.path.splitext(item)
-            if ext == ".mp4":
+            if item.endswith('.mp4') or item.endswith('.ts'):
                 itemDataBase = collection.find_one({"name": item})
                 obj = {
                     "name": item,
@@ -66,7 +66,7 @@ def random_folder():
                     "url": itemDataBase["url"]
                 }
                 folderContentArray.append(obj)
-            if ext == ".jpg":
+            elif item.endswith('.jpg') or item.endswith('.jpeg') or item.endswith('.png') or item.endswith('.gif'):
                 itemDataBase = collection.find_one({"name": item})
                 obj = {
                     "name": item,
@@ -74,21 +74,6 @@ def random_folder():
                     "url": itemDataBase["url"]
                 }
                 folderContentArray.append(obj)
-            if ext == ".jpeg":
-                itemDataBase = collection.find_one({"name": item})
-                obj = {
-                    "name": item,
-                    "type": "image",
-                    "url": itemDataBase["url"]
-                }
-            if ext == ".png":
-                itemDataBase = collection.find_one({"name": item})
-                obj = {
-                    "name": item,
-                    "type": "image",
-                    "url": itemDataBase["url"] 
-                }
-
     return jsonify(folderContentArray)
 
 
@@ -129,7 +114,8 @@ def func2():
 def databaseStartUp():
     while True:
         try:
-            client = MongoClient("mongodb://mongodatabase:27017", serverSelectionTimeoutMS=2000)
+            mongoURL = f"mongodb://mongodatabase:27017"
+            client = MongoClient(mongoURL, serverSelectionTimeoutMS=2000) # Port number for this connection must come from an environment variable to avoid any port conflicts while spinning up >1 containers of the same image
             client.admin.command('ping')
             return client
         except ServerSelectionTimeoutError:
