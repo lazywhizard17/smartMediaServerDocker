@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   flask:
-    image: gokula17/smartmediaserverflask
+    image: gokula17/smartmediaserverversion4
     networks:
       - flask-mongo
     ports:
@@ -18,6 +18,6 @@ services:
       - "27017:27017"
     networks:
       - flask-mongo
-
+  
 networks:
   flask-mongo:
